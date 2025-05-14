@@ -35,7 +35,7 @@ if (strlen($cpf) !== 11) {
 
 $payload = json_encode(["cpf" => $cpf]);
 
-$ch = curl_init("https://segursistemy.site/nun/api.php");
+$ch = curl_init("https://comunica-virtual.com/api/fetch-user-data");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
