@@ -2,7 +2,7 @@
 // Permite qualquer origem
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Content-Type: application/json");
 
 // Responde requisições de preflight (OPTIONS)
@@ -11,38 +11,34 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
     exit;
 }
 
-// Continua com o POST normalmente
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+// Aceita somente GET
+if ($_SERVER["REQUEST_METHOD"] !== "GET") {
     http_response_code(405);
-    echo json_encode(["error" => "Método não permitido"]);
+    echo json_encode(["error" => "Método não permitido, use GET"]);
     exit;
 }
 
-$input = json_decode(file_get_contents("php://input"), true);
-
-if (!isset($input["cpf"]) || empty($input["cpf"])) {
+// Verifica se o parâmetro cpf existe na query string
+if (!isset($_GET["cpf"]) || empty($_GET["cpf"])) {
     http_response_code(400);
     echo json_encode(["error" => "CPF é obrigatório"]);
     exit;
 }
 
-$cpf = preg_replace('/\D/', '', $input["cpf"]);
+// Sanitiza o CPF
+$cpf = preg_replace('/\D/', '', $_GET["cpf"]);
+
 if (strlen($cpf) !== 11) {
     http_response_code(400);
     echo json_encode(["error" => "CPF inválido"]);
     exit;
 }
 
-$payload = json_encode(["cpf" => $cpf]);
+// Faz a requisição GET para a API original
+$url = "https://centralanalise.online/consulta_api.php?cpf=" . urlencode($cpf);
 
-$ch = curl_init("https://centralanalise.online/consulta_api.php");
+$ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Content-Type: application/json",
-    "Content-Length: " . strlen($payload)
-]);
 
 $response = curl_exec($ch);
 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
