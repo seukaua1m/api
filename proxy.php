@@ -40,6 +40,14 @@ $url = "https://centralanalise.online/consulta_api.php?cpf=" . urlencode($cpf);
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
+// Define User-Agent para tentar evitar bloqueio Cloudflare
+curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36");
+
+// Define header Accept
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Accept: application/json"
+]);
+
 $response = curl_exec($ch);
 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $error = curl_error($ch);
@@ -53,3 +61,4 @@ if ($response === false) {
 
 http_response_code($http_code);
 echo $response;
+
