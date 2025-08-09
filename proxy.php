@@ -18,15 +18,12 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
     exit;
 }
 
-// Verifica se o parâmetro cpf existe
-if (!isset($_GET["cpf"]) || empty($_GET["cpf"])) {
-    http_response_code(400);
-    echo json_encode(["error" => "CPF é obrigatório"]);
-    exit;
-}
+// Captura o CPF da URL
+$request_uri = trim($_SERVER["REQUEST_URI"], "/");
+$cpf = basename($request_uri);
 
 // Sanitiza o CPF
-$cpf = preg_replace('/\D/', '', $_GET["cpf"]);
+$cpf = preg_replace('/\D/', '', $cpf);
 if (strlen($cpf) !== 11) {
     http_response_code(400);
     echo json_encode(["error" => "CPF inválido"]);
@@ -34,9 +31,9 @@ if (strlen($cpf) !== 11) {
 }
 
 // URL da API original
-$url = "https://api.dataget.site/api/v1/cpf/" . urlencode($cpf);
+$url = "https://api.dataget.site/api/v1/cpf/" . $cpf;
 
-// Token fixo (igual ao do código original)
+// Token fixo
 $token = "7e459f1bc8e1267c1ef4dca2091de42b3dad77786b0b98602a83d0da1f106a39";
 
 $ch = curl_init($url);
@@ -44,10 +41,10 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
-// Simula um navegador comum para evitar bloqueio
+// Simula navegador
 curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36");
 
-// Envia headers com o token
+// Envia headers
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Accept: application/json",
     "Content-Type: application/json",
@@ -59,7 +56,7 @@ $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $error = curl_error($ch);
 curl_close($ch);
 
-// Trata erro de conexão
+// Trata erro
 if ($response === false) {
     http_response_code(500);
     echo json_encode(["error" => "Erro ao acessar a API externa", "detalhe" => $error]);
