@@ -18,12 +18,11 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
     exit;
 }
 
-// Remove a query string e captura o CPF da URL
-$request_path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-$request_uri = trim($request_path, "/");
+// Captura o CPF da URL
+$request_uri = trim($_SERVER["REQUEST_URI"], "/");
 $cpf = basename($request_uri);
 
-// Sanitiza o CPF (remove tudo que não for número)
+// Sanitiza o CPF
 $cpf = preg_replace('/\D/', '', $cpf);
 if (strlen($cpf) !== 11) {
     http_response_code(400);
@@ -31,8 +30,11 @@ if (strlen($cpf) !== 11) {
     exit;
 }
 
-// Monta a URL da nova API
-$url = "https://idomepuxadas.xyz/api/v1/cpf/09adfd94-ef8a-4783-a976-1f67efdcb9b6/" . $cpf;
+// URL da API original
+$url = "https://idomepuxadas.xyz/api/v1/cpf/09adfd94-ef8a-4783-a976-1f67efdcb9b6" . $cpf;
+
+// Token fixo
+$token = "4d65acfcd1da251426d90daa55184843e41e18cb6e331f20a3a1a7ec54ab677e";
 
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -42,10 +44,11 @@ curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 // Simula navegador
 curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36");
 
-// Headers básicos
+// Envia headers
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Accept: application/json",
-    "Content-Type: application/json"
+    "Content-Type: application/json",
+    "Authorization: Bearer {$token}"
 ]);
 
 $response = curl_exec($ch);
@@ -53,13 +56,12 @@ $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $error = curl_error($ch);
 curl_close($ch);
 
-// Trata erro de conexão
+// Trata erro
 if ($response === false) {
     http_response_code(500);
     echo json_encode(["error" => "Erro ao acessar a API externa", "detalhe" => $error]);
     exit;
 }
 
-// Retorna resposta da API com mesmo código HTTP
 http_response_code($http_code);
 echo $response;
