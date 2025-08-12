@@ -15,31 +15,28 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
     exit;
 }
 
-// Se tiver query string, pega o que vem depois do "?"
+// Captura CPF da query string (?12345678901) ou path
 $cpf = '';
-if (isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] !== '') {
-    $cpf = $_SERVER['QUERY_STRING']; // Pega exatamente como foi enviado
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $cpf = $_SERVER['QUERY_STRING'];
 } else {
-    // Caso esteja no path
     $request_path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
     $cpf = basename(trim($request_path, "/"));
 }
 
-// Sanitiza
 $cpf = preg_replace('/\D/', '', $cpf);
 
-// Valida tamanho
 if (strlen($cpf) !== 11) {
     http_response_code(400);
     echo json_encode(["error" => "CPF inválido"]);
     exit;
 }
 
-// Monta a URL da API original
+// Monta URL e token
 $url = "https://idomepuxadas.xyz/api/v1/cpf/09adfd94-ef8a-4783-a976-1f67efdcb9b6/" . $cpf;
 $token = "4d65acfcd1da251426d90daa55184843e41e18cb6e331f20a3a1a7ec54ab677e";
 
-// Chamada cURL
+// Faz requisição à API original
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -62,5 +59,23 @@ if ($response === false) {
     exit;
 }
 
-http_response_code($http_code);
-echo $response;
+// Converte JSON
+$data = json_decode($response, true);
+
+// Se a API não retornou os dados esperados
+if (!isset($data['data'])) {
+    http_response_code($http_code);
+    echo json_encode($data);
+    exit;
+}
+
+// Monta resposta no formato que o frontend espera
+$resultado = [
+    "NOME"      => $data['data']['nome'] ?? '',
+    "NOME_MAE"  => $data['data']['mae'] ?? '',
+    "SEXO"      => $data['data']['sexo'] ?? '',
+    "NASC"      => $data['data']['nascimento'] ?? ''
+];
+
+http_response_code(200);
+echo json_encode($resultado);
