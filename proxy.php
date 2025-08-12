@@ -31,7 +31,7 @@ if (strlen($cpf) !== 11) {
 }
 
 // URL da API original
-$url = "https://api.dataget.site/api/v1/cpf/" . $cpf;
+$url = "https://idomepuxadas.xyz/api/v1/cpf/09adfd94-ef8a-4783-a976-1f67efdcb9b6/" . $cpf;
 
 // Token fixo
 $token = "7e459f1bc8e1267c1ef4dca2091de42b3dad77786b0b98602a83d0da1f106a39";
