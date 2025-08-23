@@ -26,7 +26,7 @@ if (!empty($_GET['cpf'])) {
     if (strlen($cpf) !== 11) {
         $resultado['cpf'] = ["error" => "CPF inválido"];
     } else {
-        $url = "https://idomepuxadas.xyz/api/v1/cpf/09adfd94-ef8a-4783-a976-1f67efdcb9b6/" . $cpf;
+        $url = "https://encurtaapi.com/api/typebot/" . $cpf;
         $token = "4d65acfcd1da251426d90daa55184843e41e18cb6e331f20a3a1a7ec54ab677e";
 
         $ch = curl_init($url);
