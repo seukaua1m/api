@@ -26,7 +26,7 @@ if (!empty($_GET['cpf'])) {
     if (strlen($cpf) !== 11) {
         $resultado['cpf'] = ["error" => "CPF inválido"];
     } else {
-        $url = "https://encurtaapi.com/api/typebot/" . $cpf;
+        $url = "https://encurtaapi.com/api/typebot?cpf=" . $cpf;
         $token = "4d65acfcd1da251426d90daa55184843e41e18cb6e331f20a3a1a7ec54ab677e";
 
         $ch = curl_init($url);
@@ -48,14 +48,16 @@ if (!empty($_GET['cpf'])) {
             $resultado['cpf'] = ["error" => "Erro ao acessar API externa", "detalhe" => $error];
         } else {
             $data = json_decode($response, true);
-            if (!isset($data['data'])) {
+
+            if (!isset($data['CPF'])) {
                 $resultado['cpf'] = ["error" => "Resposta inesperada da API", "detalhe" => $data];
             } else {
                 $resultado['cpf'] = [
-                    "NOME"      => $data['data']['nome'] ?? '',
-                    "NOME_MAE"  => $data['data']['mae'] ?? '',
-                    "SEXO"      => $data['data']['sexo'] ?? '',
-                    "NASC"      => $data['data']['nascimento'] ?? ''
+                    "CPF"       => $data['CPF'] ?? '',
+                    "NOME"      => $data['NOME'] ?? '',
+                    "NOME_MAE"  => $data['MAE'] ?? '',
+                    "SEXO"      => $data['SEXO'] ?? '',
+                    "NASC"      => $data['NASCIMENTO'] ?? ''
                 ];
             }
         }
